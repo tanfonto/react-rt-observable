@@ -1,14 +1,18 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { FC } from 'react';
+import { interval } from 'rxjs';
 import './App.css';
+import logo from './logo.svg';
+import { Observing } from './Observing';
 
-const App: React.FC = () => {
+const App: FC = () => {
+  const local = { text: 'index', o: interval(5000) };
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
           Edit <code>src/App.tsx</code> and save to reload.
+          <Observing {...local} />
         </p>
         <a
           className="App-link"
@@ -21,6 +25,6 @@ const App: React.FC = () => {
       </header>
     </div>
   );
-}
+};
 
 export default App;
