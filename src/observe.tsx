@@ -22,7 +22,9 @@ export function observe<P extends object = {}>(
     private subscription: Nilable<Subscription> = null;
 
     componentDidMount() {
-      combineLatest(entries(this.observables).map(withPath), merge).subscribe(
+      this.subscription = combineLatest(
+        entries(this.observables).map(withPath), merge
+      ).subscribe(
         value => this.setState(state => merge(state, value))
       );
     }
