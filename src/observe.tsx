@@ -1,30 +1,17 @@
 import React, { Component, ComponentType } from 'react';
-import { isObservable, Observable, Subscription, combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { Dictionary, ObservableLike, Pair, Nilable } from './types';
-import { entries, mapObj, merge, objOf, pickOf, snd, fst } from './utils';
+import { merge, Observable, Subscribable, Subscription, combineLatest } from 'rxjs';
+import extract from './observable/extract';
+import { Adjust, Nilable } from './types';
 
-type ObservableMap = Dictionary<Observable<any>>;
-
-function unwrap<T>(prop: ObservableLike<T>) {
-  return !isObservable(prop) ? prop : 'value' in prop ? prop.value : null;
-}
-
-function withPath<T>(entry: Pair<string, Observable<T>>) {
-  return snd(entry).pipe(map(x => objOf(fst(entry), x)));
-}
-
-export function observe<P extends object = {}>(
-  WrappedComponent: ComponentType<P>
+export function observe<P extends object, PA extends P = Adjust<Observable<any>, any, P>>(
+  WrappedComponent: ComponentType<PA>
 ) {
-  return class ObserverComponent extends Component<P, P> {
-    private observables: ObservableMap;
-    private subscription: Nilable<Subscription> = null;
-
+  return class ObserverComponent extends Component<P, PA> {
+    private subscribables = new Array<Subscribable<any>>();
+    private subscription: Nilable<Subscription>;
+      
     componentDidMount() {
-      combineLatest(entries(this.observables).map(withPath), merge).subscribe(
-        value => this.setState(state => merge(state, value))
-      );
+      this.subscription = combineLatest(this.subscribables).subscribe(() => this.forceUpdate());
     }
 
     componentWillUnmount() {
@@ -33,9 +20,10 @@ export function observe<P extends object = {}>(
 
     constructor(props: P) {
       super(props);
-      this.observables = pickOf(this.props, Observable);
-      this.state = merge(props, mapObj(this.observables, unwrap));
-    }
+      const [ adjustedProps, subscribables ] = extract<P, PA>(this.props);
+      this.state = adjustedProps;
+      this.subscribables = subscribables;
+    }  
 
     render() {
       return <WrappedComponent {...this.state} />;

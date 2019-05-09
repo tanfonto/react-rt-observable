@@ -3,9 +3,16 @@ import { interval } from 'rxjs';
 import './App.css';
 import logo from './logo.svg';
 import { Observing } from './Observing';
+import { delay } from 'rxjs/operators';
 
 const App: FC = () => {
-  const local = { text: 'index', o: interval(5000) };
+  const local = {
+    o1: interval(3000),
+    o2: interval(2000).pipe(delay(5000)),
+    nested: {
+      o3: interval(4000)
+    }
+  };
   return (
     <div className="App">
       <header className="App-header">

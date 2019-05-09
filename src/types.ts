@@ -1,16 +1,17 @@
 import { Observable } from 'rxjs';
+export type Pair<T0, T1 = T0> = [T0, T1];
 
-export interface Type<T, A extends any[] = any[]> extends Function {
-  new (...args: A): T;
-}
-
+export type Entry<T = any> = Pair<string, T>;
 export interface Dictionary<T> {
   [key: string]: T;
   [key: number]: T;
 }
 
-export type Pair<T0, T1 = T0> = [T0, T1];
+export type Adjust<W0, W1, T extends object> = {
+  [ K in keyof T ]: T[K] extends W0 ? W1 : T[K];
+}
 
-export type Nilable<T> = T | null | undefined;
-
-export type ObservableLike<T> = T | Observable<T> & { value?: T };
+export type Func<T = any> = () => T;
+export type Void = Func<void>;
+export type Nullable<T> = T | null;
+export type Nilable<T> = Nullable<T> | undefined;
